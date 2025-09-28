@@ -1,54 +1,44 @@
-import { useEffect, useState } from "react";
 import { Icon, MenuBarExtra, open } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
-
-type Bookmark = { name: string; url: string };
-
-const useBookmarks = () => {
-  const [state, setState] = useState<{ unseen: Bookmark[]; seen: Bookmark[]; isLoading: boolean }>({
-    unseen: [],
-    seen: [],
-    isLoading: true,
-  });
-  useEffect(() => {
-    (async () => {
-      setState({
-        unseen: [{ name: "Raycast Teams", url: "https://raycast.com/teams" }],
-        seen: [
-          { name: "Raycast Store", url: "https://raycast.com/store" },
-          { name: "Twitter", url: "https://twitter.com" },
-        ],
-        isLoading: false,
-      });
-    })();
-  }, []);
-  return state;
-};
+import { useLineStatuses } from "./hooks/useTflStatus";
 
 export default function Command() {
-  const { unseen: unseenBookmarks, seen: seenBookmarks, isLoading } = useBookmarks();
+  const { lineStatuses, isLoading } = useLineStatuses();
+
+  const disruptedLines = lineStatuses.filter((line) => !line.hasGoodService);
+  const hasDisruptions = disruptedLines.length > 0;
+
+  let content = (
+    <>
+      {disruptedLines.map((line) => (
+        <MenuBarExtra.Item
+          key={line.id}
+          onAction={() => open("https://tfl.gov.uk/tube-dlr-overground/status/")}
+          title={`${line.name}: ${line.status}`}
+        ></MenuBarExtra.Item>
+      ))}
+    </>
+  );
+
+  if (isLoading) {
+    content = <MenuBarExtra.Item title="Loading..." />;
+  } else if (!hasDisruptions) {
+    content = <MenuBarExtra.Item title="All lines running normally" />;
+  }
 
   return (
-    <MenuBarExtra icon={Icon.Bookmark} isLoading={isLoading}>
-      <MenuBarExtra.Item title="New" />
-      {unseenBookmarks.map((bookmark) => (
+    <MenuBarExtra
+      icon={hasDisruptions ? Icon.ExclamationMark : Icon.Train}
+      isLoading={isLoading}
+      title={hasDisruptions ? `${disruptedLines.length}` : undefined}
+    >
+      {content}
+
+      <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          key={bookmark.url}
-          icon={getFavicon(bookmark.url)}
-          title={bookmark.name}
-          onAction={() => open(bookmark.url)}
+          title="View TFL Status"
+          onAction={() => open("https://tfl.gov.uk/tube-dlr-overground/status/")}
         />
-      ))}
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item title="Seen" />
-      {seenBookmarks.map((bookmark) => (
-        <MenuBarExtra.Item
-          key={bookmark.url}
-          icon={getFavicon(bookmark.url)}
-          title={bookmark.name}
-          onAction={() => open(bookmark.url)}
-        />
-      ))}
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }

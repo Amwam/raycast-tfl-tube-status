@@ -2,12 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tfl-disruption-status",
   "title": "TFL Disruption Status",
-  "description": "Shows the distruption status of the TFL network",
+  "description": "Shows the disruption status of the TFL network",
   "icon": "extension-icon.png",
   "author": "amit_shah",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "News"
@@ -16,9 +15,16 @@
   "commands": [
     {
       "name": "tfl",
-      "title": "TFL",
-      "description": "",
-      "mode": "menu-bar"
+      "title": "TFL Menu Bar",
+      "description": "Show the Line Status of the TFL Network",
+      "mode": "menu-bar",
+      "interval": "5m"
+    },
+    {
+      "name": "show-status",
+      "title": "TFL Show Status",
+      "description": "Show the Line Status of the TFL Network",
+      "mode": "view"
     }
   ],
   "dependencies": {
